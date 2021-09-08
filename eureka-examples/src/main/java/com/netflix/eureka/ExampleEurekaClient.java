@@ -20,8 +20,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 import com.netflix.appinfo.ApplicationInfoManager;
@@ -114,7 +116,29 @@ public class ExampleEurekaClient {
         }
     }
 
-    public static void main(String[] args) {
+    /**
+     * This will be read by server internal discovery client. We need to salience it.
+     * 原文链接：https://blog.csdn.net/why_2012_gogo/article/details/83305167
+     *
+     */
+    private static void injectEurekaConfiguration() throws UnknownHostException {
+        String myHostName = InetAddress.getLocalHost().getHostName();
+        String myServiceUrl = "http://" + myHostName + ":8080/v2/";
+
+        System.setProperty("eureka.region", "default");     // 区域必须与注册中心相同
+        System.setProperty("eureka.name", "sample-servide");    // 服务名修改
+        System.setProperty("eureka.vipAddress", "sample-service.mydomain.net");    // 虚拟VIP地址，供Application Client查找
+        System.setProperty("eureka.port", "8001");      // 独立端口号，如果已被占用，请换之
+        System.setProperty("eureka.preferSameZone", "false");       // 禁用Same Zone
+        System.setProperty("eureka.shouldUseDns", "false");     // 禁用DNS
+        System.setProperty("eureka.shouldFetchRegistry", "true");   // 需要注意，必须设置为true，否则无法注册
+        System.setProperty("eureka.serviceUrl.defaultZone", myServiceUrl);     // 注册地址，必须与注册中心相同
+        System.setProperty("eureka.serviceUrl.default.defaultZone", myServiceUrl);     // 注册地址，必须与注册中心相同
+    }
+
+
+    public static void main(String[] args) throws UnknownHostException {
+        injectEurekaConfiguration();
         ExampleEurekaClient sampleClient = new ExampleEurekaClient();
 
         // create the client
