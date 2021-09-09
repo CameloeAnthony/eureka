@@ -62,7 +62,7 @@ import static com.netflix.eureka.util.EurekaMonitors.*;
 
 /**
  * Handles all registry requests from eureka clients.
- *
+ * 处理eureka client的注册请求
  * <p>
  * Primary operations that are performed are the
  * <em>Registers</em>, <em>Renewals</em>, <em>Cancels</em>, <em>Expirations</em>, and <em>Status Changes</em>. The
@@ -230,6 +230,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                 }
                 logger.debug("No previous lease information found; it is new registration");
             }
+            //Lease主要用于处理InstanceInfo的时间过期
             Lease<InstanceInfo> lease = new Lease<InstanceInfo>(registrant, leaseDuration);
             if (existingLease != null) {
                 lease.setServiceUpTimestamp(existingLease.getServiceUpTimestamp());
@@ -925,7 +926,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
     /**
      * Gets the application delta also including instances from the passed remote regions, with the instances from the
      * local region. <br/>
-     *
+     * 180秒内delta增量数据会被保存在recentlyChangedQueue中（过期清除）
      * The remote regions from where the instances will be chosen can further be restricted if this application does not
      * appear in the whitelist specified for the region as returned by
      * {@link EurekaServerConfig#getRemoteRegionAppWhitelist(String)} for a region. In case, there is no whitelist
@@ -1218,6 +1219,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
         }
     }
 
+    //服务实例的自动故障感知和自动摘除机制
     protected void postInit() {
         renewsLastMin.start();
         if (evictionTaskRef.get() != null) {
@@ -1251,6 +1253,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
         @Override
         public void run() {
             try {
+                //默认60s会进行一次定时后台任务
                 long compensationTimeMs = getCompensationTimeMs();
                 logger.info("Running the evict task with compensationTime {}ms", compensationTimeMs);
                 evict(compensationTimeMs);
@@ -1322,6 +1325,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
         return rule.apply(r, existingLease, isReplication).status();
     }
 
+    //180秒内delta增量数据会被保存在recentlyChangedQueue中
     private TimerTask getDeltaRetentionTask() {
         return new TimerTask() {
 

@@ -416,6 +416,7 @@ public class DiscoveryClient implements EurekaClient {
             throw new RuntimeException("Failed to initialize DiscoveryClient!", e);
         }
 
+        //fetchRegistry获取全量数据和增量数据
         if (clientConfig.shouldFetchRegistry() && !fetchRegistry(false)) {
             fetchRegistryFromBackup();
         }
@@ -1014,6 +1015,7 @@ public class DiscoveryClient implements EurekaClient {
     }
 
     /**
+     * 获取全量数据，并保存到本地
      * Gets the full registry information from the eureka server and stores it locally.
      * When applying the full registry, the following flow is observed:
      *

@@ -253,6 +253,7 @@ public class PeerAwareInstanceRegistryImpl extends AbstractInstanceRegistry impl
         }
         logger.info("Changing status to UP");
         applicationInfoManager.setInstanceStatus(InstanceStatus.UP);
+        //服务实例的自动故障感知和自动摘除机制
         super.postInit();
     }
 

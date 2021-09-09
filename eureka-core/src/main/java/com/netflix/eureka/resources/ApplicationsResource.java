@@ -47,7 +47,7 @@ import com.netflix.eureka.util.EurekaMonitors;
 /**
  * A <em>jersey</em> resource that handles request related to all
  * {@link com.netflix.discovery.shared.Applications}.
- *
+ * jersey的资源，类似于spring mvc中的controller， 处理对应请求
  * @author Karthik Ranganathan, Greg Kim
  *
  */
@@ -96,7 +96,7 @@ public class ApplicationsResource {
 
     /**
      * Get information about all {@link com.netflix.discovery.shared.Applications}.
-     *
+     * 全量注册表的获取
      * @param version the version of the request.
      * @param acceptHeader the accept header to indicate whether to serve JSON or XML data.
      * @param acceptEncoding the accept header to indicate whether to serve compressed or uncompressed data.
@@ -161,7 +161,7 @@ public class ApplicationsResource {
 
     /**
      * Get information about all delta changes in {@link com.netflix.discovery.shared.Applications}.
-     *
+     * 增量注册表的获取
      * <p>
      * The delta changes represent the registry information change for a period
      * as configured by
