@@ -1243,7 +1243,7 @@ public class DiscoveryClient implements EurekaClient {
      * Initializes all scheduled tasks.
      */
     private void initScheduledTasks() {
-        //定时抓取注册表的调度任务
+        //定时抓取注册表的调度任务，默认30s
         if (clientConfig.shouldFetchRegistry()) {
             // registry cache refresh timer
             int registryFetchIntervalSeconds = clientConfig.getRegistryFetchIntervalSeconds();
@@ -1268,7 +1268,7 @@ public class DiscoveryClient implements EurekaClient {
             logger.info("Starting heartbeat executor: " + "renew interval is: " + renewalIntervalInSecs);
 
             // Heartbeat timer
-            //给EurekaServer定时发送心跳的调度任务
+            //给EurekaServer定时发送心跳的调度任务,默认30s
             scheduler.schedule(
                     new TimedSupervisorTask(
                             "heartbeat",
@@ -1282,14 +1282,14 @@ public class DiscoveryClient implements EurekaClient {
                     renewalIntervalInSecs, TimeUnit.SECONDS);
 
             // InstanceInfo replicator
-            //进行复制实例信息定时复制的调度任务
+            //进行实例信息定时复制
             instanceInfoReplicator = new InstanceInfoReplicator(
                     this,
                     instanceInfo,
                     clientConfig.getInstanceInfoReplicationIntervalSeconds(),
                     2); // burstSize
 
-            //注册一个状态变更的监听器
+            //注册一个状态变更（服务上线、下线）的监听器
             statusChangeListener = new ApplicationInfoManager.StatusChangeListener() {
                 @Override
                 public String getId() {
@@ -1305,6 +1305,7 @@ public class DiscoveryClient implements EurekaClient {
                     } else {
                         logger.info("Saw local status change event {}", statusChangeEvent);
                     }
+                    //进行实例信息定时复制，在这里开始运行
                     instanceInfoReplicator.onDemandUpdate();
                 }
             };
@@ -1312,7 +1313,7 @@ public class DiscoveryClient implements EurekaClient {
             if (clientConfig.shouldOnDemandUpdateStatusChange()) {
                 applicationInfoManager.registerStatusChangeListener(statusChangeListener);
             }
-
+            //启动实例信息定时复制（调度任务），初始化为40s后启动
             instanceInfoReplicator.start(clientConfig.getInitialInstanceInfoReplicationIntervalSeconds());
         } else {
             logger.info("Not registering with Eureka server per configuration");

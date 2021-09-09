@@ -161,7 +161,7 @@ public class ApplicationInfoManager {
      * Set the status of this instance. Application can use this to indicate
      * whether it is ready to receive traffic. Setting the status here also notifies all registered listeners
      * of a status change event.
-     *
+     * 通知所有listener，当前instance的状态产生变更
      * @param status Status of the instance
      */
     public synchronized void setInstanceStatus(InstanceStatus status) {
