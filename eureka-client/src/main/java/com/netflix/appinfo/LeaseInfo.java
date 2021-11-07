@@ -30,7 +30,7 @@ import com.thoughtworks.xstream.annotations.XStreamOmitField;
  * {@link EurekaInstanceConfig#getLeaseExpirationDurationInSeconds()} which is
  * held in this lease. The lease also tracks the last time it was renewed.
  * </p>
- *
+ * 更新间隔30s，租约
  * @author Karthik Ranganathan, Greg Kim
  *
  */

@@ -105,7 +105,7 @@ import com.netflix.servo.monitor.Stopwatch;
  *
  * @author Karthik Ranganathan, Greg Kim
  * @author Spencer Gibb
- *
+ * 和EurekaServer交互的核心类，实现EurekaClient接口
  */
 @Singleton
 public class DiscoveryClient implements EurekaClient {
@@ -1015,7 +1015,7 @@ public class DiscoveryClient implements EurekaClient {
     }
 
     /**
-     * 获取全量数据，并保存到本地
+     * 获取全量数据，并保存到本地，通过AtomicLong fetchRegistryGeneration比对和更新对应的拉取版本，确保多线程并发拉取的时候数据不错乱。
      * Gets the full registry information from the eureka server and stores it locally.
      * When applying the full registry, the following flow is observed:
      *
@@ -1043,6 +1043,7 @@ public class DiscoveryClient implements EurekaClient {
 
         if (apps == null) {
             logger.error("The application is null for some reason. Not storing this information");
+            //通过AtomicLong fetchRegistryGeneration比对和更新对应的拉取版本，确保多线程并发拉取的时候数据不错乱。
         } else if (fetchRegistryGeneration.compareAndSet(currentUpdateGeneration, currentUpdateGeneration + 1)) {
             localRegionApps.set(this.filterAndShuffle(apps));
             logger.debug("Got full registry with apps hashcode {}", apps.getAppsHashCode());
@@ -1052,6 +1053,7 @@ public class DiscoveryClient implements EurekaClient {
     }
 
     /**
+     * 获取更新增量信息，通过读写锁优化性能
      * Get the delta registry information from the eureka server and update it locally.
      * When applying the delta, the following flow is observed:
      *
@@ -1114,6 +1116,7 @@ public class DiscoveryClient implements EurekaClient {
     }
 
     /**
+     * 发现数量不一致的情况，通过重新拉去注册表更新
      * Reconcile the eureka server and client registry information and logs the differences if any.
      * When reconciling, the following flow is observed:
      *
@@ -1246,7 +1249,7 @@ public class DiscoveryClient implements EurekaClient {
      */
     private void initScheduledTasks() {
         //定时抓取注册表的调度任务，默认30s
-        if (clientConfig.shouldFetchRegistry()) {
+        if (clientConfig.shouldFetchRegistry()) { //配置shouldFetchRegistry为true，默认为true
             // registry cache refresh timer
             int registryFetchIntervalSeconds = clientConfig.getRegistryFetchIntervalSeconds();
             int expBackOffBound = clientConfig.getCacheRefreshExecutorExponentialBackOffBound();
@@ -1264,13 +1267,13 @@ public class DiscoveryClient implements EurekaClient {
         }
 
 
-        if (clientConfig.shouldRegisterWithEureka()) {
+        if (clientConfig.shouldRegisterWithEureka()) { //配置registration.enabled，默认为true
             int renewalIntervalInSecs = instanceInfo.getLeaseInfo().getRenewalIntervalInSecs();
             int expBackOffBound = clientConfig.getHeartbeatExecutorExponentialBackOffBound();
             logger.info("Starting heartbeat executor: " + "renew interval is: " + renewalIntervalInSecs);
 
             // Heartbeat timer
-            //给EurekaServer定时发送心跳的调度任务,默认30s
+            //给EurekaServer定时发送心跳的调度任务,默认30s(renewalIntervalInSecs)
             scheduler.schedule(
                     new TimedSupervisorTask(
                             "heartbeat",
