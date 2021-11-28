@@ -90,6 +90,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
     private ConcurrentLinkedQueue<RecentlyChangedItem> recentlyChangedQueue = new ConcurrentLinkedQueue<RecentlyChangedItem>();
 
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    //读写锁
     private final Lock read = readWriteLock.readLock();
     private final Lock write = readWriteLock.writeLock();
     protected final Object lock = new Object();
@@ -223,6 +224,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                         // Since the client wants to cancel it, reduce the threshold
                         // (1
                         // for 30 seconds, 2 for a minute)
+                        //自我保护机制的计数
                         this.expectedNumberOfRenewsPerMin = this.expectedNumberOfRenewsPerMin + 2;
                         this.numberOfRenewsPerMinThreshold =
                                 (int) (this.expectedNumberOfRenewsPerMin * serverConfig.getRenewalPercentThreshold());

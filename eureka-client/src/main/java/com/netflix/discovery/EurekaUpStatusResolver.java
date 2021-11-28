@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Singleton that manages the state of @UpStatus/@DownStatus Supplier<Boolean>
  * and emits status changes to @UpStatus Observable<Boolean>.
- *
+ * 通过eventbus处理上线下线（打印）
  * @author elandau
  *
  */

@@ -1019,7 +1019,8 @@ public class DiscoveryClient implements EurekaClient {
     }
 
     /**
-     * 获取全量数据，并保存到本地，通过AtomicLong fetchRegistryGeneration比对和更新对应的拉取版本，确保多线程并发拉取的时候数据不错乱。
+     * 获取全量数据，并保存到本地，通过AtomicLong fetchRegistryGeneration比对和更新对应的拉取版本，
+     * 确保多线程并发拉取的时候数据不错乱。
      * Gets the full registry information from the eureka server and stores it locally.
      * When applying the full registry, the following flow is observed:
      *
