@@ -75,7 +75,7 @@ public class Applications {
     @XStreamImplicit
     private AbstractQueue<Application> applications;
 
-    private Map<String, Application> appNameApplicationMap = new ConcurrentHashMap<String, Application>();
+    private Map<String/*appName*/, Application> appNameApplicationMap = new ConcurrentHashMap<String, Application>();
     private Map<String, AbstractQueue<InstanceInfo>> virtualHostNameAppMap = new ConcurrentHashMap<String, AbstractQueue<InstanceInfo>>();
     private Map<String, AbstractQueue<InstanceInfo>> secureVirtualHostNameAppMap = new ConcurrentHashMap<String, AbstractQueue<InstanceInfo>>();
     private Map<String, AtomicLong> virtualHostNameIndexMap = new ConcurrentHashMap<String, AtomicLong>();
