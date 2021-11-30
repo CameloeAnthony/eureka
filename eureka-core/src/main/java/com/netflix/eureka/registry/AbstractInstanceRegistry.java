@@ -812,7 +812,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
      *                            as indicated by the region {@link URL} by this property
      *                            {@link EurekaServerConfig#getRemoteRegionUrls()}, false otherwise
      * @return applications
-     *
+     * 获取全量信息，如果本地没有会从远程region拉取
      * @deprecated Use {@link #getApplicationsFromMultipleRegions(String[])} instead. This method has a flawed behavior
      * of transparently falling back to a remote region if no instances for an app is available locally. The new
      * behavior is to explicitly specify if you need a remote region.
@@ -1336,6 +1336,7 @@ public abstract class AbstractInstanceRegistry implements InstanceRegistry {
                 Iterator<RecentlyChangedItem> it = recentlyChangedQueue.iterator();
                 while (it.hasNext()) {
                     if (it.next().getLastUpdateTime() <
+//                            默认180s
                             System.currentTimeMillis() - serverConfig.getRetentionTimeInMSInDeltaQueue()) {
                         it.remove();
                     } else {

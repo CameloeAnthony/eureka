@@ -14,6 +14,7 @@ import java.util.Map;
 
 /**
  * @author Tomasz Bak
+ * 定义了服务注册的接口，继承LeaseManager处理心跳续约
  */
 public interface InstanceRegistry extends LeaseManager<InstanceInfo>, LookupService<String> {
 

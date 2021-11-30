@@ -111,9 +111,9 @@ public class ResponseCacheImpl implements ResponseCache {
                     return new CopyOnWriteArrayList<Key>();
                 }
             });
-
+    //map实现readOnlyCacheMap
     private final ConcurrentMap<Key, Value> readOnlyCacheMap = new ConcurrentHashMap<Key, Value>();
-
+    //guava缓存
     private final LoadingCache<Key, Value> readWriteCacheMap;
     private final boolean shouldUseReadOnlyResponseCache;
     private final AbstractInstanceRegistry registry;
@@ -123,9 +123,11 @@ public class ResponseCacheImpl implements ResponseCache {
     ResponseCacheImpl(EurekaServerConfig serverConfig, ServerCodecs serverCodecs, AbstractInstanceRegistry registry) {
         this.serverConfig = serverConfig;
         this.serverCodecs = serverCodecs;
+//        是否使用readOnlyCache，默认为true，使用readonlycache
         this.shouldUseReadOnlyResponseCache = serverConfig.shouldUseReadOnlyResponseCache();
         this.registry = registry;
 
+        //默认30s
         long responseCacheUpdateIntervalMs = serverConfig.getResponseCacheUpdateIntervalMs();
         this.readWriteCacheMap =
                 //initialCapacity指定用于缓存的hash table最低总规模
@@ -150,13 +152,14 @@ public class ResponseCacheImpl implements ResponseCache {
                                     Key cloneWithNoRegions = key.cloneWithoutRegions();
                                     regionSpecificKeys.put(cloneWithNoRegions, key);
                                 }
+                                //获取value cache miss
                                 Value value = generatePayload(key);
                                 return value;
                             }
                         });
 
         if (shouldUseReadOnlyResponseCache) {
-            //默认30s定时比对只读缓存和读写缓存，设置为读写缓存中的值
+            //默认30s定时比对只读缓存和读写缓存，将只读缓存设置为读写缓存中的值
             timer.schedule(getCacheUpdateTask(),
                     new Date(((System.currentTimeMillis() / responseCacheUpdateIntervalMs) * responseCacheUpdateIntervalMs)
                             + responseCacheUpdateIntervalMs),
@@ -185,6 +188,7 @@ public class ResponseCacheImpl implements ResponseCache {
                         Value cacheValue = readWriteCacheMap.get(key);
                         Value currentCacheValue = readOnlyCacheMap.get(key);
                         if (cacheValue != currentCacheValue) {
+                            //将读写缓存中的数据设置给只读缓存
                             readOnlyCacheMap.put(key, cacheValue);
                         }
                     } catch (Throwable th) {
@@ -197,7 +201,7 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * Get the cached information about applications.
-     *
+     * 获取缓存的applications信息
      * <p>
      * If the cached information is not available it is generated on the first
      * request. After the first request, the information is then updated
@@ -240,7 +244,7 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * Invalidate the cache of a particular application.
-     *
+     * 刷新对应application的缓存
      * @param appName the application name of the application.
      */
     @Override
@@ -267,7 +271,7 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * Invalidate the cache information given the list of keys.
-     *
+     * 读写缓存过期
      * @param keys the list of keys for which the cache information needs to be invalidated.
      */
     public void invalidate(Key... keys) {
@@ -311,7 +315,7 @@ public class ResponseCacheImpl implements ResponseCache {
      * @deprecated use instance method {@link #getVersionDelta()}
      *
      * Gets the version number of the cached data.
-     *
+     * 获取缓存对象的版本
      * @return teh version number of the cached data.
      */
     @Deprecated
@@ -333,7 +337,7 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * Get the number of items in the response cache.
-     *
+     * 获取缓存的数量
      * @return int value representing the number of items in response cache.
      */
     @Monitor(name = "responseCacheSize", type = DataSourceType.GAUGE)
@@ -349,10 +353,12 @@ public class ResponseCacheImpl implements ResponseCache {
         Value payload = null;
         try {
             if (useReadOnlyCache) {
+                //默认为true代表需要使用只读缓存
                 final Value currentPayload = readOnlyCacheMap.get(key);
                 if (currentPayload != null) {
                     payload = currentPayload;
                 } else {
+                    //只读缓存中为空，则从读写缓存中取
                     payload = readWriteCacheMap.get(key);
                     readOnlyCacheMap.put(key, payload);
                 }
@@ -367,11 +373,13 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * Generate pay load with both JSON and XML formats for all applications.
+     * 获取applications缓存的值
      */
     private String getPayLoad(Key key, Applications apps) {
         EncoderWrapper encoderWrapper = serverCodecs.getEncoder(key.getType(), key.getEurekaAccept());
         String result;
         try {
+            //json或者xml处理
             result = encoderWrapper.encode(apps);
         } catch (Exception e) {
             logger.error("Failed to encode the payload for all apps", e);
@@ -385,6 +393,7 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * Generate pay load with both JSON and XML formats for a given application.
+     * 获取application缓存的值
      */
     private String getPayLoad(Key key, Application app) {
         if (app == null) {
@@ -417,8 +426,10 @@ public class ResponseCacheImpl implements ResponseCache {
                             payload = getPayLoad(key, registry.getApplicationsFromMultipleRegions(key.getRegions()));
                         } else {
                             tracer = serializeAllAppsTimer.start();
+                            //返回缓存的值，最终通过Value封装
                             payload = getPayLoad(key, registry.getApplications());
                         }
+                        //增量数据
                     } else if (ALL_APPS_DELTA.equals(key.getName())) {
                         if (isRemoteRegionRequested) {
                             tracer = serializeDeltaAppsWithRemoteRegionTimer.start();
@@ -499,7 +510,7 @@ public class ResponseCacheImpl implements ResponseCache {
 
     /**
      * The class that stores payload in both compressed and uncompressed form.
-     *
+     * 返回缓存对象信息，返回字节数组
      */
     public class Value {
         private final String payload;

@@ -43,7 +43,7 @@ public interface PeerAwareInstanceRegistry extends InstanceRegistry {
      * does not return registry information for a period specified in
      * {@link com.netflix.eureka.EurekaServerConfig#getWaitTimeInMsWhenSyncEmpty()}, if it cannot
      * get the registry information from the peer eureka nodes at start up.
-     *
+     * 上线时暂时不可访问
      * @return false - if the instances count from a replica transfer returned
      *         zero and if the wait time has not elapsed, otherwise returns true
      */

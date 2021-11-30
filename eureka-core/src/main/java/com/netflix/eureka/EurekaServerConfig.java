@@ -297,7 +297,7 @@ public interface EurekaServerConfig {
      * The {@link com.netflix.eureka.registry.ResponseCache} currently uses a two level caching
      * strategy to responses. A readWrite cache with an expiration policy, and a readonly cache
      * that caches without expiry.
-     *
+     * 是否使用readOnlyCache，默认为true
      * @return true if the read only cache is to be used
      */
     boolean shouldUseReadOnlyResponseCache();
@@ -561,7 +561,7 @@ public interface EurekaServerConfig {
     /**
      * Old behavior of fallback to applications in the remote region (if configured) if there are no instances of that
      * application in the local region, will be disabled.
-     *
+     * 如果本地没有applications将会使用远程的applications
      * @return {@code true} if the old behavior is to be disabled.
      */
     boolean disableTransparentFallbackToOtherRegion();

@@ -148,6 +148,7 @@ public class ApplicationsResource {
 
         Response response;
         if (acceptEncoding != null && acceptEncoding.contains(HEADER_GZIP_VALUE)) {
+            //缓存获取全量注册表
             response = Response.ok(responseCache.getGZIP(cacheKey))
                     .header(HEADER_CONTENT_ENCODING, HEADER_GZIP_VALUE)
                     .header(HEADER_CONTENT_TYPE, returnMediaType)
