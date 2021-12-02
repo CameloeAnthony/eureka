@@ -104,7 +104,7 @@ class InstanceInfoReplicator implements Runnable {
         try {
             //包含：通知所有listener，当前instance的状态产生变更
             discoveryClient.refreshInstanceInfo();
-
+            //设置dirtyTimestamp，否则返回空
             Long dirtyTimestamp = instanceInfo.isDirtyWithTime();
             if (dirtyTimestamp != null) {
                 //client注册逻辑

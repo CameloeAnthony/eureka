@@ -106,6 +106,7 @@ public class ApplicationResource {
                 EurekaAccept.fromString(eurekaAccept)
         );
 
+        //从cache中加载
         String payLoad = responseCache.get(cacheKey);
 
         if (payLoad != null) {
